@@ -1,6 +1,6 @@
 ---
 {
-    "title": "CREATE ROW POLICY",
+    "title": "CREATE DATA MASK POLICY",
     "language": "en",
     "description": "Explain can view the rewritten execution plan."
 }
@@ -13,29 +13,20 @@ Explain can view the rewritten execution plan.
 ## Syntax
 
 ```sql
-CREATE ROW POLICY [ IF NOT EXISTS ] <policy_name> 
-ON <table_name> 
-AS { RESTRICTIVE | PERMISSIVE } 
+CREATE DATA MASK POLICY [ IF NOT EXISTS ] <policy_name> 
+ON <col_name> 
 TO { <user_name> | ROLE <role_name> } 
-USING (<filter>);
+USING <mask_type> [LEVEL <priority>];
 ```
 ## Required Parameters
 
 **<policy_name>**
 
-> Row security policy name
+> column data mask policy name
 
-**<table_name>**
+**<col_name>**
 
-> Table name
-
-**<filter_type>**
-
-> RESTRICTIVE combines a set of policies with AND, PERMISSIVE combines a set of policies with OR
-
-
-
-> Equivalent to the filter condition of a query statement, for example: id=1
+> column name
 
 ## Optional Parameters
 
@@ -47,6 +38,10 @@ USING (<filter>);
 
 > Role name
 
+**<mask_type>**
+
+> Data mask type. see MASK_TYPE list
+
 ## Access Control Requirements
 
 The user executing this SQL command must have at least the following privileges:
@@ -55,23 +50,31 @@ The user executing this SQL command must have at least the following privileges:
 | ------------------------ | ------ | ----- |
 | ADMIN_PRIV or GRANT_PRIV | Global |       |
 
+## MASK_TYPE
+
+| 名称                        | 含义                            | 表达式                                                                                                |
+|:--------------------------|:------------------------------|:---------------------------------------------------------------------------------------------------|
+| MASK_REDACT | 写字母用 x 代替，大写字母用 X 代替，数字用 0 代替 | regexp_replace(regexp_replace(regexp_replace({col},'([A-Z])', 'X'),'([a-z])','x'),'([0-9])','0')   |
+| MASK_SHOW_LAST_4 | 只显示最后4个字符，其他用 X 代替            | LPAD(RIGHT({col}, 4), CHAR_LENGTH({col}), 'X')                                                     |
+| MASK_SHOW_FIRST_4 | 只显示前4个字符，其他用 X 代替             | RPAD(LEFT({col}, 4), CHAR_LENGTH({col}), 'X')                                                      |
+| MASK_HASH | 使用 sha256 对值进行 hash           |    hex(sha2({col}, 256))           |
+| MASK_NULL | 使用 NULL 对值进行覆盖                |    NULL           |
+| MASK_DATE_SHOW_YEAR | 对日期类型，只显示年份                   |    date_trunc({col}, 'year')           |
+| MASK_DEFAULT | 显示字段类型的默认值                    |               |
+| MASK_NONE | 保持原样                          |               |
+
+
 ## Examples
 
-1. Create a set of row security policies
+1. Create a set of data mask policies
 
   ```sql
-  CREATE ROW POLICY test_row_policy_1 ON test.table1 
-  AS RESTRICTIVE TO test USING (c1 = 'a');
-  CREATE ROW POLICY test_row_policy_2 ON test.table1 
-  AS RESTRICTIVE TO test USING (c2 = 'b');
-  CREATE ROW POLICY test_row_policy_3 ON test.table1 
-  AS PERMISSIVE TO test USING (c3 = 'c');
-  CREATE ROW POLICY test_row_policy_3 ON test.table1 
-  AS PERMISSIVE TO test USING (c4 = 'd');
-  ```
-
-  When we execute a query on table1, the rewritten SQL is:
-
-  ```sql
-  SELECT * FROM (SELECT * FROM table1 WHERE (c1 = 'a' AND c2 = 'b') AND (c3 = 'c' OR c4 = 'd'))
+    CREATE DATA MASK POLICY test_policy_1 ON internal.test.t1.c1
+    TO jack USING MASK_HASH;
+    
+    CREATE DATA MASK POLICY test_policy_2 ON internal.test.t1.c2
+    TO Role r1 USING MASK_NULL;
+    
+    CREATE DATA MASK POLICY test_policy_3 ON internal.test.t1.c1
+    TO jack USING MASK_NONE LEVEL 1;
   ```

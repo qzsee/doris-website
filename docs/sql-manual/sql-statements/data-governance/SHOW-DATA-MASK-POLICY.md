@@ -1,19 +1,19 @@
 ---
 {
-    "title": "SHOW ROW POLICY",
+    "title": "SHOW DATA MASK POLICY",
     "language": "en",
-    "description": "View row security policies. For details on row security policies, refer to the \"Security Policies\" chapter"
+    "description": "View data mask policies. For details on data mask policies, refer to the \"Security Policies\" chapter"
 }
 ---
 
 ## Description
 
-View row security policies. For details on row security policies, refer to the "Security Policies" chapter
+View data mask policies. For details on data mask policies, refer to the "Security Policies" chapter
 
 ## Syntax
 
 ```sql
-SHOW ROW POLICY [ FOR { <user_name> | ROLE <role_name> } ];
+SHOW DATA MASK POLICY [ FOR { <user_name> | ROLE <role_name> } ];
 ```
 ## Optional Parameters
 
@@ -35,21 +35,21 @@ The user executing this SQL command must have at least the following privileges:
 
 ## Examples
 
-1. View all security policies
+1. View all data mask policies
 
 
   ```sql
-  SHOW ROW POLICY;
+  SHOW DATA MASK POLICY;
   ```
 
 1. Query by specifying a user name
 
   ```sql
-  SHOW ROW POLICY FOR user1;
+  SHOW DATA MASK POLICY FOR user1;
   ```
 
 1. Query by specifying a role name
 
   ```sql
-  SHOW ROW POLICY for role role1;
+  SHOW DATA MASK POLICY for role role1;
   ```
