@@ -44,7 +44,6 @@ USING <mask_type> [LEVEL <priority>];
 | ADMIN_PRIV 或 *GRANT_PRIV* | 全局           |               |
 
 ## MASK_TYPE
-
 | 名称                        | 含义                            | 表达式                                                                                                |
 |:--------------------------|:------------------------------|:---------------------------------------------------------------------------------------------------|
 | MASK_REDACT | 写字母用 x 代替，大写字母用 X 代替，数字用 0 代替 | regexp_replace(regexp_replace(regexp_replace({col},'([A-Z])', 'X'),'([a-z])','x'),'([0-9])','0')   |
@@ -55,7 +54,6 @@ USING <mask_type> [LEVEL <priority>];
 | MASK_DATE_SHOW_YEAR | 对日期类型，只显示年份                   |    date_trunc({col}, 'year')           |
 | MASK_DEFAULT | 显示字段类型的默认值                    |               |
 | MASK_NONE | 保持原样                          |               |
-
 
 ## 示例
 
